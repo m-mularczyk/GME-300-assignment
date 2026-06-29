@@ -2,7 +2,6 @@ using Game.Scripts.Player;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Playables;
 
 public class PlayerManager : MonoBehaviour
 {

@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Game.Scripts.UI;
+using UnityEngine.InputSystem;
 
 
 namespace Game.Scripts.LiveObjects
@@ -66,10 +67,19 @@ namespace Game.Scripts.LiveObjects
         public static event Action<int> onHoldStarted;
         public static event Action<int> onHoldEnded;
 
+        private PlayerInput_Actions _input;
+
         private void OnEnable()
         {
             InteractableZone.onZoneInteractionComplete += SetMarker;
 
+        }
+
+        private void Start()
+        {
+            _input = new PlayerInput_Actions();
+            _input.Player.Interaction.Enable();
+            _input.Player.Action.Enable();
         }
 
         private void OnTriggerEnter(Collider other)
@@ -124,8 +134,42 @@ namespace Game.Scripts.LiveObjects
         {
             if (_inZone == true)
             {
+                
+                // Zone type input identification
+                InputAction zoneInputNeeded = null;
+                switch (_zoneKeyInput)
+                {
+                    case KeyCode.E:
+                        zoneInputNeeded = _input.Player.Interaction;
+                        break;
+                    case KeyCode.Space:
+                        zoneInputNeeded = _input.Player.Action;
+                        break;
+                }
+                
 
-                if (Input.GetKeyDown(_zoneKeyInput) && _keyState != KeyState.PressHold)
+                /*
+                // Zone type input key identification alternative - BUT is has a discrepancy in "place C4 zone"
+                // as there is an "E" key needed but the zone is marked as "Action".
+                // The following code would be more versatile (as based on zone type directly instead of following certain key input)
+                // but changing the "place C4" zone type to "Collectable" to keep the key binding intact does not properly launch the next action field
+                // (skips to hacking instead of detonation) and next zones would need adjusting too.
+                
+                InputAction zoneInputNeeded = null;
+                switch (_zoneType)
+                {
+                    case ZoneType.Collectable:
+                        zoneInputNeeded = _input.Player.Interaction;
+                        break;
+                    case ZoneType.Action:
+                    case ZoneType.HoldAction:
+                        zoneInputNeeded = _input.Player.Action;
+                        break;
+                }
+                */
+
+                //if (Input.GetKeyDown(_zoneKeyInput) && _keyState != KeyState.PressHold)
+                if (zoneInputNeeded != null & zoneInputNeeded.WasPressedThisFrame() && _keyState != KeyState.PressHold)
                 {
                     //press
                     switch (_zoneType)
@@ -149,7 +193,8 @@ namespace Game.Scripts.LiveObjects
                             break;
                     }
                 }
-                else if (Input.GetKey(_zoneKeyInput) && _keyState == KeyState.PressHold && _inHoldState == false)
+                //else if (Input.GetKey(_zoneKeyInput) && _keyState == KeyState.PressHold && _inHoldState == false)
+                else if (zoneInputNeeded != null & zoneInputNeeded.WasPressedThisFrame() && _keyState == KeyState.PressHold && _inHoldState == false)
                 {
                     _inHoldState = true;
 
@@ -163,13 +208,13 @@ namespace Game.Scripts.LiveObjects
                     }
                 }
 
-                if (Input.GetKeyUp(_zoneKeyInput) && _keyState == KeyState.PressHold)
+                //if (Input.GetKeyUp(_zoneKeyInput) && _keyState == KeyState.PressHold)
+                if (zoneInputNeeded != null & zoneInputNeeded.WasReleasedThisFrame() && _keyState == KeyState.PressHold)
                 {
                     _inHoldState = false;
                     onHoldEnded?.Invoke(_zoneID);
                 }
 
-               
             }
         }
        
