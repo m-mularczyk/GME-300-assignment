@@ -1,3 +1,4 @@
+using Game.Scripts.LiveObjects;
 using Game.Scripts.Player;
 using System.Collections;
 using System.Collections.Generic;
@@ -7,6 +8,7 @@ public class PlayerManager : MonoBehaviour
 {
     private PlayerInput_Actions _input;
     [SerializeField] private Player _player;
+    [SerializeField] private Forklift _forklift;
 
     // Start is called before the first frame update
     void Start()

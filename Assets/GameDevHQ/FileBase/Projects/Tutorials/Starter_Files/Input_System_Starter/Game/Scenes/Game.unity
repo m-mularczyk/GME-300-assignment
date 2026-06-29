@@ -28418,6 +28418,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _player: {fileID: 359860633}
+  _forklift: {fileID: 402105197}
 --- !u!4 &1364004501
 Transform:
   m_ObjectHideFlags: 0

@@ -23,9 +23,23 @@ namespace Game.Scripts.LiveObjects
         public static event Action onDriveModeEntered;
         public static event Action onDriveModeExited;
 
+        private PlayerInput_Actions _input;
+
         private void OnEnable()
         {
             InteractableZone.onZoneInteractionComplete += EnterDriveMode;
+        }
+
+        private void Start()
+        {
+            _input = new PlayerInput_Actions();
+            _input.Forklift.Enable();
+            _input.Forklift.Escape.performed += Escape_performed;
+        }
+
+        private void Escape_performed(UnityEngine.InputSystem.InputAction.CallbackContext obj)
+        {
+            ExitDriveMode();
         }
 
         private void EnterDriveMode(InteractableZone zone)
@@ -55,16 +69,18 @@ namespace Game.Scripts.LiveObjects
             {
                 LiftControls();
                 CalcutateMovement();
-                if (Input.GetKeyDown(KeyCode.Escape))
-                    ExitDriveMode();
+                //if (Input.GetKeyDown(KeyCode.Escape)) // Moved to the Escape_performed method
+                //    ExitDriveMode();
             }
 
         }
 
         private void CalcutateMovement()
         {
-            float h = Input.GetAxisRaw("Horizontal");
-            float v = Input.GetAxisRaw("Vertical");
+            //float h = Input.GetAxisRaw("Horizontal");
+            float h = _input.Forklift.Movement.ReadValue<Vector2>().x;
+            //float v = Input.GetAxisRaw("Vertical");
+            float v = _input.Forklift.Movement.ReadValue<Vector2>().y;
             var direction = new Vector3(0, 0, v);
             var velocity = direction * _speed;
 
@@ -80,9 +96,11 @@ namespace Game.Scripts.LiveObjects
 
         private void LiftControls()
         {
-            if (Input.GetKey(KeyCode.R))
+            //if (Input.GetKey(KeyCode.R))
+            if (_input.Forklift.Lift.ReadValue<float>() > 0)
                 LiftUpRoutine();
-            else if (Input.GetKey(KeyCode.T))
+            //else if (Input.GetKey(KeyCode.T))
+            else if (_input.Forklift.Lift.ReadValue<float>() < 0)
                 LiftDownRoutine();
         }
 
